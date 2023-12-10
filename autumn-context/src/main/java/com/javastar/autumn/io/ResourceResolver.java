@@ -41,7 +41,7 @@ public class ResourceResolver {
         }
     }
 
-    private <R> void scan0(String basePackagePath, Function<Resource,R> mapper, List<R> collector) throws IOException, URISyntaxException {
+    protected <R> void scan0(String basePackagePath, Function<Resource,R> mapper, List<R> collector) throws IOException, URISyntaxException {
         logger.atDebug().log("scan path: {}", basePackagePath);
         Enumeration<URL> resources = getContextClassLoader().getResources(basePackagePath);
 
@@ -61,11 +61,11 @@ public class ResourceResolver {
         }
     }
 
-    private Path jarUriToPath(String basePackagePath, URI jarUri) throws IOException {
+    protected Path jarUriToPath(String basePackagePath, URI jarUri) throws IOException {
         return FileSystems.newFileSystem(jarUri, Map.of()).getPath(basePackagePath);
     }
 
-    private <R> void scanFile(boolean isJar, String base, Path root, List<R> collector, Function<Resource,R> mapper) throws IOException {
+    protected  <R> void scanFile(boolean isJar, String base, Path root, List<R> collector, Function<Resource,R> mapper) throws IOException {
         String baseDir = removeTrailingSlash(base);
         Files.walk(root).filter(Files::isRegularFile).forEach(file -> {
             Resource res;
@@ -84,21 +84,21 @@ public class ResourceResolver {
         });
     }
 
-    private String removeLeadingSlash(String s) {
+    protected String removeLeadingSlash(String s) {
         if (s.startsWith("/") || s.startsWith("\\")) {
             s = s.substring(1);
         }
         return s;
     }
 
-    private String removeTrailingSlash(String s) {
+    protected String removeTrailingSlash(String s) {
         if (s.endsWith("/") || s.endsWith("\\")) {
             s = s.substring(0, s.length() - 1);
         }
         return s;
     }
 
-    private ClassLoader getContextClassLoader() {
+    protected ClassLoader getContextClassLoader() {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = getClass().getClassLoader();
