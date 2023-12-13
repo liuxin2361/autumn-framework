@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 
@@ -20,14 +21,6 @@ public class PropertyResolver {
     Map<String, String> properties = new HashMap<>();
     Map<Class<?>, Function<String, Object>> converts = new HashMap<>();
 
-    <T> T convert(Class<?> clazz, String value) {
-        Function<String, Object> fn = this.converts.get(clazz);
-        if (fn == null) {
-            throw new IllegalArgumentException("Unsupported value type: " + clazz.getName());
-        }
-        return (T) fn.apply(value);
-    }
-
     public PropertyResolver(Properties properties) {
         this.properties.putAll(System.getenv());
         Set<String> names = properties.stringPropertyNames();
@@ -35,6 +28,45 @@ public class PropertyResolver {
         for(String name : names) {
             this.properties.put(name, properties.getProperty(name));
         }
+
+        if (logger.isDebugEnabled()) {
+            List<String> keys = new ArrayList<>(this.properties.keySet());
+            Collections.sort(keys);
+            for(String key : keys) {
+                logger.debug("PropertyResolver: {} = {}", key, this.properties.get(key));
+            }
+        }
+
+        // register converters
+        converts.put(String.class, s -> s);
+
+        converts.put(boolean.class, s -> Boolean.parseBoolean(s));
+        converts.put(Boolean.class, s -> Boolean.valueOf(s));
+
+        converts.put(byte.class, s -> Byte.parseByte(s));
+        converts.put(Byte.class, s -> Byte.valueOf(s));
+
+        converts.put(int.class, s -> Integer.parseInt(s));
+        converts.put(Integer.class, s -> Integer.valueOf(s));
+
+        converts.put(float.class, s -> Float.parseFloat(s));
+        converts.put(Float.class, s -> Float.valueOf(s));
+
+        converts.put(long.class, s -> Long.parseLong(s));
+        converts.put(Long.class, s -> Long.valueOf(s));
+
+        converts.put(double.class, s -> Double.parseDouble(s));
+        converts.put(Double.class, s -> Double.valueOf(s));
+
+        converts.put(short.class, s -> Short.parseShort(s));
+        converts.put(Short.class, s -> Short.valueOf(s));
+
+        converts.put(LocalDate.class, s -> LocalDate.parse(s));
+        converts.put(LocalTime.class, s -> LocalTime.parse(s));
+        converts.put(LocalDateTime.class, s -> LocalDateTime.parse(s));
+        converts.put(ZonedDateTime.class, s -> ZonedDateTime.parse(s));
+        converts.put(Duration.class, s -> Duration.parse(s));
+        converts.put(ZoneId.class, s -> ZoneId.of(s));
     }
 
     @Nullable
@@ -63,6 +95,14 @@ public class PropertyResolver {
         return convert(targetType, value);
     }
 
+    public <T> T getProperty(String key, T defaultValue, Class<T> targetType) {
+        String value = getProperty(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        return convert(targetType, value);
+    }
+
     private String parseValue(String value) {
         PropertyExpr expr = parsePropertyExpr(value);
         if (expr == null) {
@@ -78,6 +118,15 @@ public class PropertyResolver {
     public String getRequiredProperty(String key) {
         String value = getProperty(key);
         return Objects.requireNonNull(value, "Property '" + key + "' not found.");
+    }
+
+    @SuppressWarnings("unchecked")
+    <T> T convert(Class<?> clazz, String value) {
+        Function<String, Object> fn = this.converts.get(clazz);
+        if (fn == null) {
+            throw new IllegalArgumentException("Unsupported value type: " + clazz.getName());
+        }
+        return (T) fn.apply(value);
     }
 
     public String getProperty(String key, String defaultValue) {

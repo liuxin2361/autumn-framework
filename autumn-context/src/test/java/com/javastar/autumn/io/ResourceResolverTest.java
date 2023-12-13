@@ -7,7 +7,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ResourceResolverTest {
+public class ResourceResolverTest {
 
     @Test
     public void scanClass() {
