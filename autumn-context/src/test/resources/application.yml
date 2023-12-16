@@ -1,0 +1,10 @@
+app:
+  title: Autumn Framework
+  version: 1.0.0
+
+autumn:
+  datasource:
+    url: jdbc:mysql:file:test.tmp
+    username: admin
+    password:
+    auto-commit: ${AUTO_COMMIT:false}
