@@ -13,7 +13,7 @@ public class BeanDefinition implements Comparable<BeanDefinition>{
     // unique bean name
     private final String name;
 
-    // bean class
+    // bean class(宣言型)
     private final Class<?> beanClass;
 
     // bean instance
