@@ -1,12 +1,18 @@
 package com.javastar.autumn.utils;
 
 import com.javastar.autumn.exception.BeanDefinitionException;
-import com.javastar.autumn.io.ResourceResolver;
 
 import java.lang.annotation.Annotation;
 
 public class ClassUtils {
 
+    /**
+     *
+     * @param target
+     * @param annoClass
+     * @return
+     * @param <A>
+     */
     public static <A extends Annotation> A findAnnotation(Class<?> target, Class<A> annoClass) {
         A a = target.getAnnotation(annoClass);
         for (Annotation annotation : target.getAnnotations()) {
