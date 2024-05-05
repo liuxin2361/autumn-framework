@@ -120,6 +120,11 @@ public class PropertyResolver {
         return Objects.requireNonNull(value, "Property '" + key + "' not found.");
     }
 
+    public <T> T getRequiredProperty(String key, Class<T> targetType) {
+        T value = getProperty(key, targetType);
+        return Objects.requireNonNull(value, "Property '" + key + "' not found.");
+    }
+
     @SuppressWarnings("unchecked")
     <T> T convert(Class<?> clazz, String value) {
         Function<String, Object> fn = this.converts.get(clazz);
